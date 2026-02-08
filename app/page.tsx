@@ -13,6 +13,7 @@ export default function Home() {
             <a href="#features" className="hover:text-blue-600 transition">الخدمات</a>
             <a href="#staff" className="hover:text-blue-600 transition">للموظفين</a>
             <a href="#travelers" className="hover:text-blue-600 transition">للمسافرين</a>
+            <a href="/shift-organizer" className="hover:text-blue-600 transition">منظم الشفتات</a>
           </nav>
           <a
             href="#"
