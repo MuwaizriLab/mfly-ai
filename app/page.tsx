@@ -14,6 +14,7 @@ export default function Home() {
             <a href="/fare-hunter" className="hover:text-blue-600 transition">صائد العروض</a>
             <a href="/airport-translator" className="hover:text-blue-600 transition">مترجم المطار</a>
             <a href="/visa-checker" className="hover:text-blue-600 transition">فاحص الفيزا</a>
+            <a href="/weight-calculator" className="hover:text-blue-600 transition">حاسبة الوزن</a>
             <a href="#features" className="hover:text-blue-600 transition">الخدمات</a>
             <a href="#staff" className="hover:text-blue-600 transition">للموظفين</a>
             <a href="#travelers" className="hover:text-blue-600 transition">للمسافرين</a>
