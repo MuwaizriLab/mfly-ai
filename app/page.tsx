@@ -10,6 +10,7 @@ export default function Home() {
             ✈️ mfly.ai
           </div>
           <nav className="hidden md:flex gap-6 font-medium text-slate-600">
+            <a href="/inspire-me" className="hover:text-blue-600 transition">ألهمني</a>
             <a href="#features" className="hover:text-blue-600 transition">الخدمات</a>
             <a href="#staff" className="hover:text-blue-600 transition">للموظفين</a>
             <a href="#travelers" className="hover:text-blue-600 transition">للمسافرين</a>
