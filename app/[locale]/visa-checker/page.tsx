@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Header from '@/components/Header'; // Import the new Header component
-import visaRules from '@/data/visa-rules.json';
+import Header from '@/components/Header';
 import { VisaRule } from '@/types/visa';
 
 export default function VisaCheckerPage() {
@@ -10,16 +9,47 @@ export default function VisaCheckerPage() {
   const [destination, setDestination] = useState('');
   const [result, setResult] = useState<VisaRule | null>(null);
 
-  const handleCheck = (e: React.FormEvent) => {
+  const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nationality || !destination) return;
 
-    const found = visaRules.find(
-      rule =>
-        rule.nationality === nationality &&
-        rule.destination === destination.toUpperCase()
-    );
-    setResult(found || null);
+    try {
+      const res = await fetch(
+        `https://nbumeglrzwwhtjwdkdya.supabase.co/rest/v1/visa_rules?nationality=eq.${nationality}&destination_country=eq.${destination.toUpperCase()}`,
+        {
+          headers: {
+            apikey: 'sb_publishable_N0C35kKr_aif8GFlzLDa2g_PtujIK4M',
+            Authorization: 'Bearer sb_publishable_N0C35kKr_aif8GFlzLDa2g_PtujIK4M',
+          },
+        }
+      );
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const rule = data[0];
+        setResult({
+          nationality: rule.nationality,
+          destination: rule.destination_country,
+          visaRequired: rule.visa_required,
+          duration: rule.duration || 'غير محدد',
+          notes: rule.notes,
+          updatedAt: rule.created_at?.split('T')[0] || '2026-02-11',
+        });
+      } else {
+        setResult(null); // لا يوجد نتيجة
+      }
+    } catch (err) {
+      console.error('فشل جلب البيانات:', err);
+      // Fallback إلى البيانات المحلية
+      const fallbackData = [
+        { nationality: 'KW', destination: 'TR', visaRequired: false, duration: '90 يوم', notes: 'دخول بدون فيزا لمدة 90 يوم خلال 180 يوم.', updatedAt: '2026-02-01' },
+        { nationality: 'KW', destination: 'US', visaRequired: true, duration: '10 سنوات', notes: 'فيزا B1/B2، مقابلة في السفارة مطلوبة.', updatedAt: '2026-01-15' },
+        { nationality: 'KW', destination: 'GB', visaRequired: false, duration: '6 أشهر', notes: 'دخول كزائر بدون فيزا.', updatedAt: '2026-02-10' },
+      ];
+      const found = fallbackData.find(
+        rule => rule.nationality === nationality && rule.destination === destination.toUpperCase()
+      );
+      setResult(found || null);
+    }
   };
 
   return (
