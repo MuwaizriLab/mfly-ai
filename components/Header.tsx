@@ -19,6 +19,7 @@ export default function Header() {
           <Link href="/visa-checker" className="hover:text-blue-600 transition">{th('visaChecker')}</Link>
           <Link href="/weight-calculator" className="hover:text-blue-600 transition">{th('weightCalculator')}</Link>
           <Link href="/shift-organizer" className="hover:text-blue-600 transition">{th('shiftOrganizer')}</Link>
+          <Link href="/daily-challenge" className="hover:text-blue-600 transition">🧠 التحدي اليومي</Link>
         </nav>
         <LocaleSwitcher /> {/* Language Switcher Component */}
         <a
