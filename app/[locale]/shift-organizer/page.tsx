@@ -1,24 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Header from '@/components/Header';
 
 type ShiftCode = 'M' | 'A/N' | 'O' | 'N';
 interface Employee {
-  id: number;
+  id: string;
   name: string;
   shifts: ShiftCode[]; // 7 أيام من الأحد إلى السبت
+}
+
+interface SupabaseEmployee {
+  id: string;
+  name: string;
+  employee_id: string;
+  email: string;
+}
+
+interface SupabaseShift {
+  id: string;
+  employee_id: string;
+  shift_date: string;
+  shift_type: string;
 }
 
 export default function ShiftOrganizerPage() {
   const t = useTranslations('ShiftOrganizerPage');
   const [employees, setEmployees] = useState<Employee[]>([
-    { id: 1, name: 'أحمد العلي', shifts: ['M', 'M', 'O', 'N', 'N', 'A/N', 'O'] },
-    { id: 2, name: 'سارة الحربي', shifts: ['A/N', 'A/N', 'M', 'M', 'O', 'N', 'N'] },
-    { id: 3, name: 'خالد الشمري', shifts: ['N', 'N', 'A/N', 'A/N', 'M', 'M', 'O'] },
+    { id: '1', name: 'أحمد العلي', shifts: ['M', 'M', 'O', 'N', 'N', 'A/N', 'O'] },
+    { id: '2', name: 'سارة الحربي', shifts: ['A/N', 'A/N', 'M', 'M', 'O', 'N', 'N'] },
+    { id: '3', name: 'خالد الشمري', shifts: ['N', 'N', 'A/N', 'A/N', 'M', 'M', 'O'] },
   ]);
   const [newEmployeeName, setNewEmployeeName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const shiftDetails = {
     'M': { label: 'صباحي', time: '٦ ص – ٢ ظ', color: 'bg-blue-100 text-blue-800' },
@@ -29,7 +45,65 @@ export default function ShiftOrganizerPage() {
 
   const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
-  const updateShift = (empId: number, dayIndex: number, newShift: ShiftCode) => {
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  async function fetchEmployees() {
+    setLoading(true);
+    try {
+      const res = await fetch('https://nbumeglrzwwhtjwdkdya.supabase.co/rest/v1/employees', {
+        headers: {
+          apikey: 'sb_publishable_N0C35kKr_aif8GFlzLDa2g_PtujIK4M',
+          Authorization: 'Bearer sb_publishable_N0C35kKr_aif8GFlzLDa2g_PtujIK4M',
+        },
+      });
+      const supabaseEmployees: SupabaseEmployee[] = await res.json();
+      if (supabaseEmployees.length > 0) {
+        // تحويل البيانات إلى شكل مناسب
+        const converted: Employee[] = supabaseEmployees.map((emp, idx) => ({
+          id: emp.id,
+          name: emp.name,
+          shifts: ['M', 'M', 'O', 'N', 'N', 'A/N', 'O'], // شفتات تجريبية (يمكن تطويرها لتحميل الفعلية)
+        }));
+        setEmployees(converted);
+      }
+    } catch (err) {
+      setError('فشل تحميل بيانات الموظفين. تأكد من اتصال قاعدة البيانات.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function addEmployeeToSupabase(name: string, email: string) {
+    try {
+      const res = await fetch('https://nbumeglrzwwhtjwdkdya.supabase.co/rest/v1/employees', {
+        method: 'POST',
+        headers: {
+          apikey: 'sb_publishable_N0C35kKr_aif8GFlzLDa2g_PtujIK4M',
+          Authorization: 'Bearer sb_publishable_N0C35kKr_aif8GFlzLDa2g_PtujIK4M',
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation',
+        },
+        body: JSON.stringify({
+          employee_id: `EMP${Date.now().toString().slice(-4)}`,
+          name,
+          email: email || `${name.replace(/\s+/g, '.')}@mfly.ai`,
+        }),
+      });
+      const newEmp = await res.json();
+      if (newEmp && newEmp[0]) {
+        setEmployees(prev => [...prev, { id: newEmp[0].id, name, shifts: ['O', 'O', 'O', 'O', 'O', 'O', 'O'] }]);
+        return true;
+      }
+    } catch (err) {
+      console.error('فشل إضافة موظف:', err);
+    }
+    return false;
+  }
+
+  const updateShift = (empId: string, dayIndex: number, newShift: ShiftCode) => {
     setEmployees(prev =>
       prev.map(emp =>
         emp.id === empId
