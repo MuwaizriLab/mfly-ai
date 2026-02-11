@@ -1,0 +1,82 @@
+[
+  {
+    "nationality": "KW",
+    "destination": "TR",
+    "visaRequired": false,
+    "duration": "90 يوم",
+    "notes": "دخول بدون فيزا لمدة 90 يوم خلال 180 يوم.",
+    "updatedAt": "2026-02-01"
+  },
+  {
+    "nationality": "KW",
+    "destination": "US",
+    "visaRequired": true,
+    "duration": "10 سنوات",
+    "notes": "فيزا B1/B2، مقابلة في السفارة مطلوبة.",
+    "updatedAt": "2026-01-15"
+  },
+  {
+    "nationality": "KW",
+    "destination": "GB",
+    "visaRequired": false,
+    "duration": "6 أشهر",
+    "notes": "دخول كزائر بدون فيزا.",
+    "updatedAt": "2026-02-10"
+  },
+  {
+    "nationality": "SA",
+    "destination": "TR",
+    "visaRequired": false,
+    "duration": "90 يوم",
+    "notes": "دخول بدون فيزا.",
+    "updatedAt": "2026-02-01"
+  },
+  {
+    "nationality": "AE",
+    "destination": "TR",
+    "visaRequired": false,
+    "duration": "90 يوم",
+    "notes": "دخول بدون فيزا.",
+    "updatedAt": "2026-02-01"
+  },
+  {
+    "nationality": "QA",
+    "destination": "TR",
+    "visaRequired": false,
+    "duration": "90 يوم",
+    "notes": "دخول بدون فيزا.",
+    "updatedAt": "2026-02-01"
+  },
+  {
+    "nationality": "KW",
+    "destination": "TH",
+    "visaRequired": false,
+    "duration": "30 يوم",
+    "notes": "دخول بدون فيزا، يمكن التمديد.",
+    "updatedAt": "2026-01-20"
+  },
+  {
+    "nationality": "KW",
+    "destination": "MY",
+    "visaRequired": false,
+    "duration": "90 يوم",
+    "notes": "دخول بدون فيزا.",
+    "updatedAt": "2026-01-20"
+  },
+  {
+    "nationality": "KW",
+    "destination": "EG",
+    "visaRequired": false,
+    "duration": "3 أشهر",
+    "notes": "دخول بدون فيزا.",
+    "updatedAt": "2026-01-20"
+  },
+  {
+    "nationality": "KW",
+    "destination": "IN",
+    "visaRequired": true,
+    "duration": "حسب الطلب",
+    "notes": "فيزا إلكترونية (eVisa) متاحة.",
+    "updatedAt": "2026-01-20"
+  }
+]
