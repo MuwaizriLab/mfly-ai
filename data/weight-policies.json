@@ -1,0 +1,38 @@
+[
+  {
+    "airline": "Kuwait Airways",
+    "economy": { "allowed": 40, "extraPerKg": 15 },
+    "business": { "allowed": 60, "extraPerKg": 10 },
+    "first": { "allowed": 80, "extraPerKg": 5 }
+  },
+  {
+    "airline": "Saudia",
+    "economy": { "allowed": 35, "extraPerKg": 20 },
+    "business": { "allowed": 50, "extraPerKg": 15 },
+    "first": { "allowed": 70, "extraPerKg": 10 }
+  },
+  {
+    "airline": "Emirates",
+    "economy": { "allowed": 45, "extraPerKg": 25 },
+    "business": { "allowed": 65, "extraPerKg": 20 },
+    "first": { "allowed": 90, "extraPerKg": 15 }
+  },
+  {
+    "airline": "Qatar Airways",
+    "economy": { "allowed": 42, "extraPerKg": 22 },
+    "business": { "allowed": 60, "extraPerKg": 18 },
+    "first": { "allowed": 85, "extraPerKg": 12 }
+  },
+  {
+    "airline": "Turkish Airlines",
+    "economy": { "allowed": 30, "extraPerKg": 18 },
+    "business": { "allowed": 55, "extraPerKg": 14 },
+    "first": { "allowed": 75, "extraPerKg": 10 }
+  },
+  {
+    "airline": "British Airways",
+    "economy": { "allowed": 38, "extraPerKg": 30 },
+    "business": { "allowed": 58, "extraPerKg": 25 },
+    "first": { "allowed": 80, "extraPerKg": 20 }
+  }
+]
