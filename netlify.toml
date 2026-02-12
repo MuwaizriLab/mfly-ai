@@ -4,8 +4,21 @@
 
 [build.environment]
   NODE_VERSION = "20.16.0"
-  NPM_FLAGS = "--legacy-peer-deps"
+  NPM_FLAGS = "--legacy-peer-deps --no-audit --no-fund"
   
 [context.production.environment]
   NEXT_PUBLIC_SUPABASE_URL = "https://nbumeglrzwwhtjwdkdya.supabase.co"
   NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5idW1lZ2xyend3aHRqd2RrZHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNjk2NjEsImV4cCI6MjA4NTk0NTY2MX0.qlM4R_7u0c3I1rbkKzVFl-gva_YV1YlsYJ882P7afQc"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/ar/:path"
+  to = "/:path?locale=ar"
+  status = 200
+
+[[redirects]]
+  from = "/en/:path"
+  to = "/:path?locale=en"
+  status = 200
