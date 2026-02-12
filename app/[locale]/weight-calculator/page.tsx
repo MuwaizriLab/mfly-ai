@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Header from '@/components/Header';
 import { supabase } from '@/lib/supabase';
-import { WeightPolicy, CalculationResult } from '@/types/weight';
+import { WeightPolicy, CalculationResult, LocalWeightPolicy } from '@/types/weight';
+import localWeightPolicies from '@/data/weight-policies.json';
 
 export default function WeightCalculatorPage() {
   const t = useTranslations('WeightCalculatorPage');
@@ -14,7 +15,7 @@ export default function WeightCalculatorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // جلب بيانات سياسات الوزن من Supabase
+  // جلب بيانات سياسات الوزن من Supabase مع fallback إلى البيانات المحلية
   useEffect(() => {
     const fetchWeightPolicies = async () => {
       try {
@@ -24,15 +25,38 @@ export default function WeightCalculatorPage() {
           .select('*')
           .order('airline');
 
-        if (error) throw error;
-        
-        if (data) {
+        if (error) {
+          console.warn('Failed to fetch from Supabase, using local data:', error.message);
+          // استخدام البيانات المحلية كخيار احتياطي
+          const localPolicies: WeightPolicy[] = (localWeightPolicies as LocalWeightPolicy[]).map(policy => ({
+            airline: policy.airline,
+            economy_allowed: policy.economy.allowed,
+            economy_extra_per_kg: policy.economy.extraPerKg,
+            business_allowed: policy.business.allowed,
+            business_extra_per_kg: policy.business.extraPerKg,
+            first_allowed: policy.first.allowed,
+            first_extra_per_kg: policy.first.extraPerKg
+          }));
+          setPolicies(localPolicies);
+          setError('⚠️ متصل بالبيانات المحلية (Supabase غير متوفر)');
+        } else if (data) {
           setPolicies(data);
           setError(null);
         }
       } catch (err) {
         console.error('Error fetching weight policies:', err);
-        setError('حدث خطأ في جلب بيانات سياسات الوزن. الرجاء المحاولة لاحقاً.');
+        // استخدام البيانات المحلية كخيار احتياطي
+        const localPolicies: WeightPolicy[] = (localWeightPolicies as LocalWeightPolicy[]).map(policy => ({
+          airline: policy.airline,
+          economy_allowed: policy.economy.allowed,
+          economy_extra_per_kg: policy.economy.extraPerKg,
+          business_allowed: policy.business.allowed,
+          business_extra_per_kg: policy.business.extraPerKg,
+          first_allowed: policy.first.allowed,
+          first_extra_per_kg: policy.first.extraPerKg
+        }));
+        setPolicies(localPolicies);
+        setError('⚠️ متصل بالبيانات المحلية (خطأ في الاتصال)');
       } finally {
         setLoading(false);
       }
