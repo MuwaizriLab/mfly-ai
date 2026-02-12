@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import Header from '@/components/Header'; // Import the new Header component
-import weightPolicies from '@/data/weight-policies.json';
+import Header from '@/components/Header';
+import { supabase } from '@/lib/supabase';
 import { WeightPolicy, CalculationResult } from '@/types/weight';
 
 export default function WeightCalculatorPage() {
@@ -10,19 +10,62 @@ export default function WeightCalculatorPage() {
   const [ticketClass, setTicketClass] = useState('');
   const [totalWeight, setTotalWeight] = useState<number>(0);
   const [results, setResults] = useState<CalculationResult[]>([]);
+  const [policies, setPolicies] = useState<WeightPolicy[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // جلب بيانات سياسات الوزن من Supabase
+  useEffect(() => {
+    const fetchWeightPolicies = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('weight_policies')
+          .select('*')
+          .order('airline');
+
+        if (error) throw error;
+        
+        if (data) {
+          setPolicies(data);
+          setError(null);
+        }
+      } catch (err) {
+        console.error('Error fetching weight policies:', err);
+        setError('حدث خطأ في جلب بيانات سياسات الوزن. الرجاء المحاولة لاحقاً.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeightPolicies();
+  }, []);
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!airline || !ticketClass || totalWeight <= 0) return;
+    if (!airline || !ticketClass || totalWeight <= 0 || policies.length === 0) return;
 
-    const filtered = weightPolicies.filter(
-      (policy: WeightPolicy) =>
-        airline === 'all' || policy.airline === airline
-    );
+    // تصفية السياسات حسب الخطوط الجوية المختارة
+    const filtered = airline === 'all' 
+      ? policies 
+      : policies.filter(policy => policy.airline === airline);
 
     const calculated = filtered.map((policy) => {
-      const allowed = policy[ticketClass as keyof WeightPolicy]?.allowed || 0;
-      const extraPerKg = policy[ticketClass as keyof WeightPolicy]?.extraPerKg || 0;
+      // تحديد الفئة المختارة وحساب القيم المناسبة
+      let allowed = 0;
+      let extraPerKg = 0;
+
+      if (ticketClass === 'economy') {
+        allowed = policy.economy_allowed;
+        extraPerKg = policy.economy_extra_per_kg;
+      } else if (ticketClass === 'business') {
+        allowed = policy.business_allowed;
+        extraPerKg = policy.business_extra_per_kg;
+      } else if (ticketClass === 'first') {
+        allowed = policy.first_allowed;
+        extraPerKg = policy.first_extra_per_kg;
+      }
+
       const extraWeight = Math.max(0, totalWeight - allowed);
       const extraCharge = extraWeight * extraPerKg;
       const totalCharge = extraCharge;
@@ -53,6 +96,12 @@ export default function WeightCalculatorPage() {
           </p>
         </header>
 
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+            ⚠️ {error}
+          </div>
+        )}
+
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-slate-800 mb-4">{t('baggageDetailsTitle')}</h2>
           <form className="space-y-6" onSubmit={handleCalculate}>
@@ -66,15 +115,19 @@ export default function WeightCalculatorPage() {
                 onChange={(e) => setAirline(e.target.value)}
                 className="w-full p-3 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
+                disabled={loading}
               >
                 <option value="">اختر الخطوط</option>
                 <option value="all">جميع الخطوط (مقارنة)</option>
-                {weightPolicies.map((policy) => (
+                {policies.map((policy) => (
                   <option key={policy.airline} value={policy.airline}>
                     {policy.airline}
                   </option>
                 ))}
               </select>
+              {loading && (
+                <p className="text-sm text-slate-500 mt-1">جاري تحميل قائمة الخطوط الجوية...</p>
+              )}
             </div>
 
             <div>
@@ -87,6 +140,7 @@ export default function WeightCalculatorPage() {
                 onChange={(e) => setTicketClass(e.target.value)}
                 className="w-full p-3 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
+                disabled={loading}
               >
                 <option value="">{t('selectTicketClass')}</option>
                 <option value="economy">{t('economy')}</option>
@@ -107,14 +161,16 @@ export default function WeightCalculatorPage() {
                 onChange={(e) => setTotalWeight(Number(e.target.value))}
                 className="w-full p-3 border border-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
+                disabled={loading}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-600/20"
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 disabled:bg-slate-400 disabled:cursor-not-allowed"
+              disabled={loading || policies.length === 0}
             >
-              {t('calculateFeesButton')}
+              {loading ? 'جاري التحميل...' : t('calculateFeesButton')}
             </button>
           </form>
         </section>
@@ -154,8 +210,18 @@ export default function WeightCalculatorPage() {
           <section className="mt-12">
             <h2 className="text-2xl font-bold text-slate-800 mb-4">{t('resultsTitle')}</h2>
             <div className="bg-slate-100 p-6 rounded-lg text-slate-700 min-h-[100px]">
-              <p className="text-lg">{t('resultsText')}</p>
-              <p className="text-sm text-slate-500 mt-2">{t('resultsDeveloping')}</p>
+              {loading ? (
+                <p className="text-lg">جاري تحميل بيانات سياسات الوزن...</p>
+              ) : policies.length === 0 ? (
+                <p className="text-lg">لا توجد بيانات سياسات وزن متاحة حالياً.</p>
+              ) : (
+                <>
+                  <p className="text-lg">{t('resultsText')}</p>
+                  <p className="text-sm text-slate-500 mt-2">
+                    ✅ متصل بقاعدة البيانات | ✅ {policies.length} سياسة وزن جاهزة
+                  </p>
+                </>
+              )}
             </div>
           </section>
         )}
